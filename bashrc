@@ -5,6 +5,15 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+if [ "$PS1" ] ; then 
+mkdir -m 0700 /dev/cgroup/cpu/user/$$
+echo $$ > /dev/cgroup/cpu/user/$$/tasks
+fi
+
+if [ "$PS1" ] ; then 
+complete -cf sudo
+fi
+
 # don't put duplicate lines in the history. See bash(1) for more options
 # don't overwrite GNU Midnight Commander's setting of `ignorespace'.
 export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
@@ -91,10 +100,37 @@ alias ll='ls -l'
 #alias la='ls -A'
 #alias l='ls -CF'
 alias haz='sudo apt-get install'
+
 alias apt-get='sudo apt-get'
 alias dpkg='sudo dpkg'
-alias l='cd /home/pvullo/sicma/litchee'
+#alias l='cd /home/pvullo/sicma/litchee'
+alias vi='vim'
+
 trouve() { find -name "*.[ch]" -type f -exec grep -i --color $1 {} -Hn \;; }
+#autocompletion for haz
+function make-completion-wrapper () {
+        local function_name="$2"
+        local arg_count=$(($#-3))
+        local comp_function_name="$1"
+        shift 2
+        local function="
+function $function_name {
+        ((COMP_CWORD+=$arg_count))
+        COMP_WORDS=( "$@" \${COMP_WORDS[@]:1} )
+        "$comp_function_name"
+        return 0
+}"
+        eval "$function"
+}
+
+make-completion-wrapper _apt_get _haz apt-get install
+complete -o filenames -F _haz haz
+
+
+
+
+
+
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
